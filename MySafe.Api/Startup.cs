@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Mime;
 using System.Security.Claims;
@@ -81,6 +82,24 @@ namespace MySafe.Api
                         IssuerSigningKey = AppData.AuthOptions.GetSymmetricSecurityKey(),
                         // валидация ключа безопасности
                         ValidateIssuerSigningKey = true
+                    };
+
+                    options.Events.OnTokenValidated = context =>
+                    {
+                        Debug.WriteLine("OnTokenValidated");
+                        return Task.CompletedTask;
+                    };
+
+                    options.Events.OnMessageReceived = context =>
+                    {
+                        Debug.WriteLine("OnMessageReceived");
+                        return Task.CompletedTask;
+                    };
+
+                    options.Events.OnChallenge = context =>
+                    {
+                        Debug.WriteLine("OnChallenge");
+                        return Task.CompletedTask;
                     };
                 });
 

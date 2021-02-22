@@ -40,6 +40,7 @@ namespace MySafe.Api.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] User userRequest)
         {
@@ -111,6 +112,7 @@ namespace MySafe.Api.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [Route("sign_in")]
         public async Task<IActionResult> SignIn([FromBody] User user)
         {

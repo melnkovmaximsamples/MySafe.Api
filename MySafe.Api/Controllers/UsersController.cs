@@ -44,6 +44,5 @@ namespace MySafe.Api.Controllers
             
             return result.Errors?.Length > 0 ? BadRequest(result) : Ok(result) as IActionResult;
         }
-
     }
 }

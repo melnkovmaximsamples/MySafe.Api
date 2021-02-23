@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -8,11 +10,10 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using MySafe.Data.Entities;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace MySafe.Api.Attributes
+namespace MySafe.Api.Filters
 {
+    //TODO: maybe to remove, if on tokenvalidation in startup is OK
     public class AuthorizeFilter : IAsyncAuthorizationFilter
     {
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
@@ -27,7 +28,7 @@ namespace MySafe.Api.Attributes
 
             if (userManager == null)
             {
-                context.Result = new JsonResult(new { message = "Internal server error" }) { StatusCode = StatusCodes.Status500InternalServerError };
+                context.Result = new UnauthorizedResult();
                 return;
             }
 
@@ -40,7 +41,7 @@ namespace MySafe.Api.Attributes
 
             if (accessToken?.IsActive == true) return;
 
-            context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
+            context.Result = new UnauthorizedResult();
 
         }
 

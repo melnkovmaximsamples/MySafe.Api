@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Mime;
 using System.Reflection;
@@ -18,6 +19,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Http;
@@ -25,13 +27,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using MySafe.Api.Attributes;
+using MySafe.Api.Filters;
 using MySafe.Api.Profiles;
 using MySafe.Api.Services;
 using MySafe.Core;
 using MySafe.Data.EF;
 using MySafe.Data.Entities;
 using MySafe.Data.Identity;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
 namespace MySafe.Api
@@ -67,8 +70,51 @@ namespace MySafe.Api
                 })
                 .AddJwtBearer(options =>
                 {
-                    //var key = Encoding.ASCII.GetBytes(Configuration["JwtConfig:Secret"]);
+                    options.Events = new JwtBearerEvents();
+                    // TODO: move code challenge and tokenvalidated to services
+                    options.Events.OnTokenValidated = async (context) =>
+                    {
+                        var tokenHandler = new JwtSecurityTokenHandler();
 
+                        // TODO access_token to constants
+                        var jwtAccessToken = tokenHandler.WriteToken(context.SecurityToken);
+
+                        var userManager = context.HttpContext.RequestServices
+                            .GetService(typeof(UserManager<ApplicationUser>)) as UserManager<ApplicationUser>;
+
+                        if (userManager == null)
+                        {
+                            context.Fail(new UnauthorizedAccessException());
+                        }
+
+                        var user = await userManager.Users
+                            .Include(e => e.AccessTokens)
+                            .FirstOrDefaultAsync(x => x.AccessTokens
+                                .Any(t => t.JwtToken == jwtAccessToken));
+
+                        var accessToken = user?.AccessTokens.FirstOrDefault(x => x.JwtToken == jwtAccessToken);
+
+                        if (accessToken?.IsActive == true) return;
+                        
+                        context.Fail(new UnauthorizedAccessException());
+                    };
+                    options.Events.OnChallenge = context =>
+                    {
+                        context.HandleResponse();
+
+                        var payload = new JObject
+                        {
+                            ["error"] = context.Error
+                        };
+
+                        if (!string.IsNullOrEmpty(context?.ErrorDescription)) payload.Add("error_description", context.ErrorDescription);
+                        //payload.Add("error_uri", context.ErrorUri);
+
+                        context.Response.ContentType = "application/json";
+                        context.Response.StatusCode = 401;
+
+                        return context.Response.WriteAsync(payload.ToString());
+                    };
                     options.SaveToken = true;
                     options.RequireHttpsMetadata = true;
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -161,7 +207,7 @@ namespace MySafe.Api
             services.AddAutoMapper(typeof(Startup));
             services.AddAuthorization();
             services.AddControllers()
-                .AddMvcOptions(options => options.Filters.Add(typeof(AuthorizeFilter)))
+                //.AddMvcOptions(options => options.Filters.Add(typeof(AuthorizeFilter)))
                 .AddJsonOptions(options => options.JsonSerializerOptions.IgnoreNullValues = true);
         }
 

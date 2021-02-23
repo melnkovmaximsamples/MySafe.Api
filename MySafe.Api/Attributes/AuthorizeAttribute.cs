@@ -19,6 +19,7 @@ namespace MySafe.Api.Attributes
         {
             if (!IsRequiredTokenValidation(context)) return;
 
+            // TODO access_token to constants
             var jwtAccessToken = await context.HttpContext.GetTokenAsync(JwtBearerDefaults.AuthenticationScheme, "access_token");
 
             var userManager = context.HttpContext.RequestServices

@@ -13,8 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MySafe.Data", "MySafe.Data\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MySafe.Core", "MySafe.Core\MySafe.Core.csproj", "{1A272483-E201-456B-996F-E80BCBAF3E75}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi", "..\..\..\Desktop\aspnet-core-3-registration-login-api-master\WebApi.csproj", "{18176CE6-69D3-4145-8DFA-3BCB1A021CF9}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,10 +31,6 @@ Global
 		{1A272483-E201-456B-996F-E80BCBAF3E75}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A272483-E201-456B-996F-E80BCBAF3E75}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A272483-E201-456B-996F-E80BCBAF3E75}.Release|Any CPU.Build.0 = Release|Any CPU
-		{18176CE6-69D3-4145-8DFA-3BCB1A021CF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{18176CE6-69D3-4145-8DFA-3BCB1A021CF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{18176CE6-69D3-4145-8DFA-3BCB1A021CF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{18176CE6-69D3-4145-8DFA-3BCB1A021CF9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -9,7 +9,7 @@ namespace MySafe.Api.Services
 {
     public interface IIdentityService
     {
-        Task<AuthenticationResult> CreateAccessTokenAsync(Guid userId);
-        Task<AuthenticationResult> CreateRefreshTokenAsync(string jwtAccessToken);
+        Task<AuthenticateResponse> RegisterAsync(UserRequest request, string ipAddress);
+        Task<AuthenticateResponse> AuthenticateAsync(UserRequest request, string ipAddress);
     }
 }

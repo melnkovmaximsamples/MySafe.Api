@@ -11,20 +11,28 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Mime;
+using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MySafe.Api.Attributes;
+using MySafe.Api.Profiles;
+using MySafe.Api.Services;
 using MySafe.Core;
 using MySafe.Data.EF;
 using MySafe.Data.Entities;
 using MySafe.Data.Identity;
+using Newtonsoft.Json.Serialization;
 
 namespace MySafe.Api
 {
@@ -83,24 +91,6 @@ namespace MySafe.Api
                         // валидация ключа безопасности
                         ValidateIssuerSigningKey = true
                     };
-
-                    options.Events.OnTokenValidated = context =>
-                    {
-                        Debug.WriteLine("OnTokenValidated");
-                        return Task.CompletedTask;
-                    };
-
-                    options.Events.OnMessageReceived = context =>
-                    {
-                        Debug.WriteLine("OnMessageReceived");
-                        return Task.CompletedTask;
-                    };
-
-                    options.Events.OnChallenge = context =>
-                    {
-                        Debug.WriteLine("OnChallenge");
-                        return Task.CompletedTask;
-                    };
                 });
 
 
@@ -127,7 +117,7 @@ namespace MySafe.Api
                 options.Lockout.MaxFailedAccessAttempts = 10;
                 options.Lockout.AllowedForNewUsers = true;
 
-                // User settings.
+                // UserRequest settings.
                 options.User.AllowedUserNameCharacters = null;
                 options.User.RequireUniqueEmail = true;
 
@@ -164,11 +154,15 @@ namespace MySafe.Api
                 });
             });
 
-            services.AddScoped<ApplicationUserManager>();
+            // services
+            services.AddScoped<IIdentityService, IdentityService>();
 
-            services.AddAuthentication();
+            services.AddScoped<ApplicationUserManager>();
+            services.AddAutoMapper(typeof(Startup));
             services.AddAuthorization();
-            services.AddControllers();
+            services.AddControllers()
+                .AddMvcOptions(options => options.Filters.Add(typeof(AuthorizeFilter)))
+                .AddJsonOptions(options => options.JsonSerializerOptions.IgnoreNullValues = true);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -178,7 +172,7 @@ namespace MySafe.Api
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            
             app.UseHsts();
 
             app.UseSwagger();
@@ -189,6 +183,7 @@ namespace MySafe.Api
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

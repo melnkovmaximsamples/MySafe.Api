@@ -7,17 +7,16 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MySafe.Api.Attributes;
 
 namespace MySafe.Api.Controllers
-
- 
 {
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize]
     [Route("api/[controller]")] // api/todo
     [ApiController]
     public class TodoController : ControllerBase
     {
-        [HttpPost]
+        [HttpGet]
         [Route("[action]")]
         public IActionResult GetString()
         {
